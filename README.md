@@ -2,9 +2,11 @@
 
 <div align = center>
 
-<img src="screenshot.png" width="1280" height="720" alt="banner">
+<img src="screenshot.png">
 
 <br>
+
+<div align = left>
 
 Replaces rounded corners with chamfered corners. Currently, it functions pretty much the same as borders++, but it also loads in a different border shader and swaps out the default shader and back when renderBorder is called.  
 
