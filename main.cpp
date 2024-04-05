@@ -2,7 +2,7 @@
 
 #include <unistd.h>
 
-#include <any>
+//#include <any>
 #include <hyprland/src/Compositor.hpp>
 #include <hyprland/src/desktop/Window.hpp>
 #include <hyprland/src/config/ConfigManager.hpp>
@@ -10,8 +10,9 @@
 #include "borderDeco.hpp"
 #include "globals.hpp"
 #include "shaders/Border.hpp"
-#include "shaders/Shadow.hpp"
+//#include "shaders/Shadow.hpp"
 #include "shaders/Textures.hpp"
+
 
 // Do NOT change this function.
 APICALL EXPORT std::string PLUGIN_API_VERSION() {
@@ -166,4 +167,5 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
 APICALL EXPORT void PLUGIN_EXIT() {
     wl_event_source_remove(g_pGlobalState->tick);
+    CFancyBorder::unhijackShader();
 }

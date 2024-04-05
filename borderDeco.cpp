@@ -97,7 +97,7 @@ void CFancyBorder::unhijackShader() {
 }
 
 
-void CFancyBorder::draw(CMonitor* pMonitor, float alpha, const Vector2D& offset) {
+void CFancyBorder::draw(CMonitor* pMonitor, float a) {
     if (!g_pCompositor->windowValidMapped(m_pWindow))
         return;
 
@@ -118,14 +118,14 @@ void CFancyBorder::draw(CMonitor* pMonitor, float alpha, const Vector2D& offset)
     if (**PBORDERS < 1)
         return;
 
-    const auto PWORKSPACE      = g_pCompositor->getWorkspaceByID(m_pWindow->m_iWorkspaceID);
+    const auto PWORKSPACE      = m_pWindow->m_pWorkspace;
     const auto WORKSPACEOFFSET = PWORKSPACE && !m_pWindow->m_bPinned ? PWORKSPACE->m_vRenderOffset.value() : Vector2D();
 
     auto       rounding      = m_pWindow->rounding() == 0 ? 0 : m_pWindow->rounding() * pMonitor->scale + **PBORDERSIZE;
     const auto ORIGINALROUND = rounding == 0 ? 0 : m_pWindow->rounding() * pMonitor->scale + **PBORDERSIZE;
     CBox       fullBox       = {m_vLastWindowPos.x, m_vLastWindowPos.y, m_vLastWindowSize.x, m_vLastWindowSize.y};
 
-    fullBox.translate(offset - pMonitor->vecPosition + WORKSPACEOFFSET).scale(pMonitor->scale);
+    fullBox.translate(m_pWindow->m_vFloatingOffset - pMonitor->vecPosition + WORKSPACEOFFSET).scale(pMonitor->scale);
 
     double fullThickness = 0;
 
@@ -134,6 +134,7 @@ void CFancyBorder::draw(CMonitor* pMonitor, float alpha, const Vector2D& offset)
     fullBox.width += **PBORDERSIZE * 2 * pMonitor->scale;
     fullBox.height += **PBORDERSIZE * 2 * pMonitor->scale;
 
+    hijackShader();
     for (size_t i = 0; i < **PBORDERS; ++i) {
         const int PREVBORDERSIZESCALED = i == 0 ? 0 : (**PSIZES[i - 1] == -1 ? **PBORDERSIZE : **(PSIZES[i - 1])) * pMonitor->scale;
         const int THISBORDERSIZE       = **(PSIZES[i]) == -1 ? **PBORDERSIZE : (**PSIZES[i]);
@@ -150,17 +151,19 @@ void CFancyBorder::draw(CMonitor* pMonitor, float alpha, const Vector2D& offset)
             break;
 
         g_pHyprOpenGL->scissor((CBox*)nullptr);
-        hijackShader();
+
         g_pHyprOpenGL->renderBorder(
             &fullBox, 
             CColor{(uint64_t) * *PCOLORS[i]}, 
+            //grad,
             **PNATURALROUND ? ORIGINALROUND : rounding, 
             THISBORDERSIZE,
-            alpha,
+            a, //alpha
             **PNATURALROUND ? ORIGINALROUND : -1);
-        unhijackShader();
+
         fullThickness += THISBORDERSIZE;
     }
+    unhijackShader();
 
     m_seExtents = {{fullThickness, fullThickness}, {fullThickness, fullThickness}};
 

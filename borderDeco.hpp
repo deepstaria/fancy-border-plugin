@@ -13,7 +13,7 @@ class CFancyBorder : public IHyprWindowDecoration {
 
     virtual void                       onPositioningReply(const SDecorationPositioningReply& reply);
 
-    virtual void                       draw(CMonitor*, float alpha, const Vector2D& offset);
+    virtual void                       draw(CMonitor*, float a);
 
     virtual eDecorationType            getDecorationType();
 
@@ -27,10 +27,10 @@ class CFancyBorder : public IHyprWindowDecoration {
 
     virtual std::string                getDisplayName();
 
-  private:
-    void                               hijackShader();
-    void                               unhijackShader();
+    static void                        hijackShader();
+    static void                        unhijackShader();
 
+  private:
     SWindowDecorationExtents m_seExtents;
 
     CWindow*                 m_pWindow = nullptr;
