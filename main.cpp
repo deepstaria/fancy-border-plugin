@@ -21,7 +21,7 @@ APICALL EXPORT std::string PLUGIN_API_VERSION() {
 
 void onNewWindow(void* self, std::any data) {
     // data is guaranteed
-    auto* const PWINDOW = std::any_cast<CWindow*>(data);
+    const auto PWINDOW = std::any_cast<PHLWINDOW>(data);
 
     HyprlandAPI::addWindowDecoration(PHANDLE, PWINDOW, std::make_unique<CFancyBorder>(PWINDOW));
 }
@@ -147,7 +147,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
     HyprlandAPI::reloadConfig();
 
-    HyprlandAPI::registerCallbackDynamic(PHANDLE, "openWindow", [&](void* self, SCallbackInfo& info, std::any data) { onNewWindow(self, data); });
+    static auto P = HyprlandAPI::registerCallbackDynamic(PHANDLE, "openWindow", [&](void* self, SCallbackInfo& info, std::any data) { onNewWindow(self, data); });
 
     g_pGlobalState = std::make_unique<SGlobalState>();
     initGlobal();
@@ -157,7 +157,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
         if (w->isHidden() || !w->m_bIsMapped)
             continue;
 
-        HyprlandAPI::addWindowDecoration(PHANDLE, w.get(), std::make_unique<CFancyBorder>(w.get()));
+        HyprlandAPI::addWindowDecoration(PHANDLE, w, std::make_unique<CFancyBorder>(w));
     }
 
     HyprlandAPI::addNotification(PHANDLE, "[fancy-border] Initialized successfully!", CColor{0.2, 1.0, 0.2, 1.0}, 5000);
