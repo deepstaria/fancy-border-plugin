@@ -60,43 +60,6 @@ std::string CFancyBorder::getDisplayName() {
     return "FancyBorders";
 }
 
-void CFancyBorder::hijackShader() {
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.program = g_pGlobalState->borderShader1.program;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.proj = g_pGlobalState->borderShader1.proj;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.thick = g_pGlobalState->borderShader1.thick;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.posAttrib = g_pGlobalState->borderShader1.posAttrib;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.texAttrib = g_pGlobalState->borderShader1.texAttrib;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.topLeft = g_pGlobalState->borderShader1.topLeft;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.bottomRight = g_pGlobalState->borderShader1.bottomRight;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.fullSize = g_pGlobalState->borderShader1.fullSize;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.fullSizeUntransformed = g_pGlobalState->borderShader1.fullSizeUntransformed;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.radius = g_pGlobalState->borderShader1.radius;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.radiusOuter = g_pGlobalState->borderShader1.radiusOuter;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.gradient = g_pGlobalState->borderShader1.gradient;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.gradientLength = g_pGlobalState->borderShader1.gradientLength;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.angle = g_pGlobalState->borderShader1.angle;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.alpha = g_pGlobalState->borderShader1.alpha;
-}
-
-void CFancyBorder::unhijackShader() {
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.program = g_pGlobalState->borderShader0.program;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.proj = g_pGlobalState->borderShader0.proj;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.thick = g_pGlobalState->borderShader0.thick;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.posAttrib = g_pGlobalState->borderShader0.posAttrib;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.texAttrib = g_pGlobalState->borderShader0.texAttrib;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.topLeft = g_pGlobalState->borderShader0.topLeft;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.bottomRight = g_pGlobalState->borderShader0.bottomRight;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.fullSize = g_pGlobalState->borderShader0.fullSize;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.fullSizeUntransformed = g_pGlobalState->borderShader0.fullSizeUntransformed;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.radius = g_pGlobalState->borderShader0.radius;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.radiusOuter = g_pGlobalState->borderShader0.radiusOuter;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.gradient = g_pGlobalState->borderShader0.gradient;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.gradientLength = g_pGlobalState->borderShader0.gradientLength;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.angle = g_pGlobalState->borderShader0.angle;
-    g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.alpha = g_pGlobalState->borderShader0.alpha;
-}
-
-
 void CFancyBorder::draw(CMonitor* pMonitor, float a) {
     if (!validMapped(m_pWindow))
         return;
@@ -112,6 +75,7 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
         PSIZES.push_back((Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:fancy-border:border_size_" + std::to_string(i + 1))->getDataStaticPtr());
     }
     static auto* const PBORDERS      = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:fancy-border:add_borders")->getDataStaticPtr();
+            //grad,
     static auto* const PNATURALROUND = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "plugin:fancy-border:natural_rounding")->getDataStaticPtr();
     static auto* const PROUNDING     = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "decoration:rounding")->getDataStaticPtr();
     static auto* const PBORDERSIZE   = (Hyprlang::INT* const*)HyprlandAPI::getConfigValue(PHANDLE, "general:border_size")->getDataStaticPtr();
@@ -135,7 +99,6 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
     fullBox.width += **PBORDERSIZE * 2 * pMonitor->scale;
     fullBox.height += **PBORDERSIZE * 2 * pMonitor->scale;
 
-    hijackShader();
     for (size_t i = 0; i < **PBORDERS; ++i) {
         const int PREVBORDERSIZESCALED = i == 0 ? 0 : (**PSIZES[i - 1] == -1 ? **PBORDERSIZE : **(PSIZES[i - 1])) * pMonitor->scale;
         const int THISBORDERSIZE       = **(PSIZES[i]) == -1 ? **PBORDERSIZE : (**PSIZES[i]);
@@ -153,10 +116,9 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
 
         g_pHyprOpenGL->scissor((CBox*)nullptr);
 
-        g_pHyprOpenGL->renderBorder(
+        renderBorder(
             &fullBox, 
-            CColor{(uint64_t) * *PCOLORS[i]}, 
-            //grad,
+            CColor{(uint64_t) * *PCOLORS[i]}, //grad
             **PNATURALROUND ? ORIGINALROUND : rounding, 
             THISBORDERSIZE,
             a, //alpha
@@ -164,7 +126,6 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
 
         fullThickness += THISBORDERSIZE;
     }
-    unhijackShader();
 
     m_seExtents = {{fullThickness, fullThickness}, {fullThickness, fullThickness}};
 
@@ -174,6 +135,109 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
         g_pDecorationPositioner->repositionDeco(this);
     }
 }
+
+
+void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int round, int borderSize, float a, int outerRound) {
+    RASSERT((box->width > 0 && box->height > 0), "Tried to render rect with width/height < 0!");
+    RASSERT(g_pHyprOpenGL->m_RenderData.pMonitor, "Tried to render rect without begin()!");
+
+    TRACY_GPU_ZONE("RenderBorder");
+
+    bool m_bEndFrame = false; // normally false
+
+
+    if (g_pHyprOpenGL->m_RenderData.damage.empty() || (g_pHyprOpenGL->m_pCurrentWindow.lock() && g_pHyprOpenGL->m_pCurrentWindow->m_sAdditionalConfigData.forceNoBorder))
+        return;
+
+    CBox newBox = *box;
+    g_pHyprOpenGL->m_RenderData.renderModif.applyToBox(newBox);
+
+    box = &newBox;
+
+    if (borderSize < 1)
+        return;
+
+    int scaledBorderSize = std::round(borderSize * g_pHyprOpenGL->m_RenderData.pMonitor->scale);
+    scaledBorderSize     = std::round(scaledBorderSize * g_pHyprOpenGL->m_RenderData.renderModif.combinedScale());
+
+    // adjust box
+    box->x -= scaledBorderSize;
+    box->y -= scaledBorderSize;
+    box->width += 2 * scaledBorderSize;
+    box->height += 2 * scaledBorderSize;
+
+    round += round == 0 ? 0 : scaledBorderSize;
+
+    float matrix[9];
+    wlr_matrix_project_box(matrix, box->pWlr(), wlr_output_transform_invert(!m_bEndFrame ? WL_OUTPUT_TRANSFORM_NORMAL : g_pHyprOpenGL->m_RenderData.pMonitor->transform), newBox.rot,
+                           g_pHyprOpenGL->m_RenderData.pMonitor->projMatrix.data()); // TODO: write own, don't use WLR here
+
+    float glMatrix[9]; 
+    wlr_matrix_multiply(glMatrix, g_pHyprOpenGL->m_RenderData.projection, matrix);
+    
+    const auto BLEND = glIsEnabled(GL_BLEND); //m_bBlend;
+    g_pHyprOpenGL->blend(true);
+
+    glUseProgram(g_pGlobalState->borderShader.program);
+
+#ifndef GLES2
+    glUniformMatrix3fv(g_pGlobalState->borderShader.proj, 1, GL_TRUE, glMatrix);
+#else
+    wlr_matrix_transpose(glMatrix, glMatrix);
+    glUniformMatrix3fv(g_pGlobalState->borderShader.proj, 1, GL_FALSE, glMatrix);
+#endif
+
+    static_assert(sizeof(CColor) == 4 * sizeof(float)); // otherwise the line below this will fail
+
+    glUniform4fv(g_pGlobalState->borderShader.gradient, grad.m_vColors.size(), (float*)grad.m_vColors.data());
+    glUniform1i(g_pGlobalState->borderShader.gradientLength, grad.m_vColors.size());
+    glUniform1f(g_pGlobalState->borderShader.angle, (int)(grad.m_fAngle / (PI / 180.0)) % 360 * (PI / 180.0));
+    glUniform1f(g_pGlobalState->borderShader.alpha, a);
+
+    CBox transformedBox = *box;
+    transformedBox.transform(wlr_output_transform_invert(g_pHyprOpenGL->m_RenderData.pMonitor->transform), g_pHyprOpenGL->m_RenderData.pMonitor->vecTransformedSize.x,
+                             g_pHyprOpenGL->m_RenderData.pMonitor->vecTransformedSize.y);
+
+    const auto TOPLEFT  = Vector2D(transformedBox.x, transformedBox.y);
+    const auto FULLSIZE = Vector2D(transformedBox.width, transformedBox.height);
+
+    glUniform2f(g_pGlobalState->borderShader.topLeft, (float)TOPLEFT.x, (float)TOPLEFT.y);
+    glUniform2f(g_pGlobalState->borderShader.fullSize, (float)FULLSIZE.x, (float)FULLSIZE.y);
+    glUniform2f(g_pGlobalState->borderShader.fullSizeUntransformed, (float)box->width, (float)box->height);
+    glUniform1f(g_pGlobalState->borderShader.radius, round);
+    glUniform1f(g_pGlobalState->borderShader.radiusOuter, outerRound == -1 ? round : outerRound);
+    glUniform1f(g_pGlobalState->borderShader.thick, scaledBorderSize);
+
+    glVertexAttribPointer(g_pGlobalState->borderShader.posAttrib, 2, GL_FLOAT, GL_FALSE, 0, fullVerts);
+    glVertexAttribPointer(g_pGlobalState->borderShader.texAttrib, 2, GL_FLOAT, GL_FALSE, 0, fullVerts);
+
+    glEnableVertexAttribArray(g_pGlobalState->borderShader.posAttrib);
+    glEnableVertexAttribArray(g_pGlobalState->borderShader.texAttrib);
+
+    if (g_pHyprOpenGL->m_RenderData.clipBox.width != 0 && g_pHyprOpenGL->m_RenderData.clipBox.height != 0) {
+        CRegion damageClip{g_pHyprOpenGL->m_RenderData.clipBox.x, g_pHyprOpenGL->m_RenderData.clipBox.y, g_pHyprOpenGL->m_RenderData.clipBox.width, g_pHyprOpenGL->m_RenderData.clipBox.height};
+        damageClip.intersect(g_pHyprOpenGL->m_RenderData.damage);
+
+        if (!damageClip.empty()) {
+            for (auto& RECT : damageClip.getRects()) {
+                g_pHyprOpenGL->scissor(&RECT);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            }
+        }
+    } else {
+        for (auto& RECT : g_pHyprOpenGL->m_RenderData.damage.getRects()) {
+            g_pHyprOpenGL->scissor(&RECT);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        }
+    }
+
+    glDisableVertexAttribArray(g_pGlobalState->borderShader.posAttrib);
+
+    glDisableVertexAttribArray(g_pGlobalState->borderShader.texAttrib);
+
+    g_pHyprOpenGL->blend(BLEND);
+}
+
 
 eDecorationType CFancyBorder::getDecorationType() {
     return DECORATION_CUSTOM;

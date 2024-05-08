@@ -87,37 +87,21 @@ void initGlobal() {
             "Couldn't set current EGL!");
 
     GLuint prog                              = CreateProgram(QUADVERTSRC, FRAGBORDER2);
-    g_pGlobalState->borderShader1.program     = prog;
-    g_pGlobalState->borderShader1.proj        = glGetUniformLocation(prog, "proj");
-    g_pGlobalState->borderShader1.thick       = glGetUniformLocation(prog, "thick");
-    g_pGlobalState->borderShader1.posAttrib   = glGetAttribLocation(prog, "pos");
-    g_pGlobalState->borderShader1.texAttrib   = glGetAttribLocation(prog, "texcoord");
-    g_pGlobalState->borderShader1.topLeft     = glGetUniformLocation(prog, "topLeft");
-    g_pGlobalState->borderShader1.bottomRight = glGetUniformLocation(prog, "bottomRight");
-    g_pGlobalState->borderShader1.fullSize    = glGetUniformLocation(prog, "fullSize");
-    g_pGlobalState->borderShader1.fullSizeUntransformed = glGetUniformLocation(prog, "fullSizeUntransformed");
-    g_pGlobalState->borderShader1.radius      = glGetUniformLocation(prog, "radius");
-    g_pGlobalState->borderShader1.radiusOuter = glGetUniformLocation(prog, "radiusOuter");
-    g_pGlobalState->borderShader1.gradient    = glGetUniformLocation(prog, "gradient");
-    g_pGlobalState->borderShader1.gradientLength = glGetUniformLocation(prog, "gradientLength");
-    g_pGlobalState->borderShader1.angle       = glGetUniformLocation(prog, "angle");
-    g_pGlobalState->borderShader1.alpha       = glGetUniformLocation(prog, "alpha");
-
-    g_pGlobalState->borderShader0.program     = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.program;
-    g_pGlobalState->borderShader0.proj        = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.proj;
-    g_pGlobalState->borderShader0.thick       = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.thick;
-    g_pGlobalState->borderShader0.posAttrib   = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.posAttrib;
-    g_pGlobalState->borderShader0.texAttrib   = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.texAttrib;
-    g_pGlobalState->borderShader0.topLeft     = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.topLeft;
-    g_pGlobalState->borderShader0.bottomRight = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.bottomRight;
-    g_pGlobalState->borderShader0.fullSize    = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.fullSize;
-    g_pGlobalState->borderShader0.fullSizeUntransformed = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.fullSizeUntransformed;
-    g_pGlobalState->borderShader0.radius      = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.radius;
-    g_pGlobalState->borderShader0.radiusOuter = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.radiusOuter;
-    g_pGlobalState->borderShader0.gradient    = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.gradient;
-    g_pGlobalState->borderShader0.gradientLength = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.gradientLength;
-    g_pGlobalState->borderShader0.angle       = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.angle;
-    g_pGlobalState->borderShader0.alpha       = g_pHyprOpenGL->m_RenderData.pCurrentMonData->m_shBORDER1.alpha;
+    g_pGlobalState->borderShader.program     = prog;
+    g_pGlobalState->borderShader.proj        = glGetUniformLocation(prog, "proj");
+    g_pGlobalState->borderShader.thick       = glGetUniformLocation(prog, "thick");
+    g_pGlobalState->borderShader.posAttrib   = glGetAttribLocation(prog, "pos");
+    g_pGlobalState->borderShader.texAttrib   = glGetAttribLocation(prog, "texcoord");
+    g_pGlobalState->borderShader.topLeft     = glGetUniformLocation(prog, "topLeft");
+    g_pGlobalState->borderShader.bottomRight = glGetUniformLocation(prog, "bottomRight");
+    g_pGlobalState->borderShader.fullSize    = glGetUniformLocation(prog, "fullSize");
+    g_pGlobalState->borderShader.fullSizeUntransformed = glGetUniformLocation(prog, "fullSizeUntransformed");
+    g_pGlobalState->borderShader.radius      = glGetUniformLocation(prog, "radius");
+    g_pGlobalState->borderShader.radiusOuter = glGetUniformLocation(prog, "radiusOuter");
+    g_pGlobalState->borderShader.gradient    = glGetUniformLocation(prog, "gradient");
+    g_pGlobalState->borderShader.gradientLength = glGetUniformLocation(prog, "gradientLength");
+    g_pGlobalState->borderShader.angle       = glGetUniformLocation(prog, "angle");
+    g_pGlobalState->borderShader.alpha       = glGetUniformLocation(prog, "alpha");
 
     RASSERT(eglMakeCurrent(wlr_egl_get_display(g_pCompositor->m_sWLREGL), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT), "Couldn't unset current EGL!");
 
@@ -167,5 +151,4 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
 APICALL EXPORT void PLUGIN_EXIT() {
     wl_event_source_remove(g_pGlobalState->tick);
-    CFancyBorder::unhijackShader();
 }

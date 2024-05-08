@@ -4,6 +4,9 @@
 
 #include <hyprland/src/render/decorations/IHyprWindowDecoration.hpp>
 
+
+class CGradientValueData;
+
 class CFancyBorder : public IHyprWindowDecoration {
   public:
     CFancyBorder(PHLWINDOW);
@@ -27,8 +30,7 @@ class CFancyBorder : public IHyprWindowDecoration {
 
     virtual std::string                getDisplayName();
 
-    static void                        hijackShader();
-    static void                        unhijackShader();
+    void                               renderBorder(CBox*, const CGradientValueData&, int round, int borderSize, float a = 1.0, int outerRound = -1 /* use round */);
 
   private:
     SWindowDecorationExtents m_seExtents;
