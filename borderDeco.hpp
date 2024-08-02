@@ -3,6 +3,7 @@
 #define WLR_USE_UNSTABLE
 
 #include <hyprland/src/render/decorations/IHyprWindowDecoration.hpp>
+#include <hyprland/src/render/OpenGL.hpp>
 
 
 class CGradientValueData;
@@ -32,8 +33,11 @@ class CFancyBorder : public IHyprWindowDecoration {
 
     void                               renderBorder(CBox*, const CGradientValueData&, int round, int borderSize, float a = 1.0, int outerRound = -1 /* use round */);
 
+    void                               renderBorderTexture();
+
   private:
-    SWindowDecorationExtents m_seExtents;
+    //SWindowDecorationExtents m_seExtents;
+    SBoxExtents              m_seExtents;
 
     PHLWINDOWREF             m_pWindow;
 
@@ -41,6 +45,8 @@ class CFancyBorder : public IHyprWindowDecoration {
 
     Vector2D                 m_vLastWindowPos;
     Vector2D                 m_vLastWindowSize;
+
+    SP<CTexture>             m_tBorderShape;
 
     double                   m_fLastThickness = 0;
 };

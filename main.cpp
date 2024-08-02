@@ -10,7 +10,6 @@
 #include "borderDeco.hpp"
 #include "globals.hpp"
 #include "shaders/Border.hpp"
-//#include "shaders/Shadow.hpp"
 #include "shaders/Textures.hpp"
 
 
@@ -38,7 +37,7 @@ GLuint CompileShader(const GLuint& type, std::string src) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
 
     if (ok == GL_FALSE)
-        throw std::runtime_error("compileShader() failed!");
+        throw std::runtime_error("CompileShader() failed!");
 
     return shader;
 }
@@ -68,7 +67,7 @@ GLuint CreateProgram(const std::string& vert, const std::string& frag) {
     glGetProgramiv(prog, GL_LINK_STATUS, &ok);
 
     if (ok == GL_FALSE)
-        throw std::runtime_error("createProgram() failed! GL_LINK_STATUS not OK!");
+        throw std::runtime_error("CreateProgram() failed! GL_LINK_STATUS not OK!");
 
     return prog;
 }
@@ -83,8 +82,9 @@ int onTick(void* data) {
 }
 
 void initGlobal() {
-    RASSERT(eglMakeCurrent(wlr_egl_get_display(g_pCompositor->m_sWLREGL), EGL_NO_SURFACE, EGL_NO_SURFACE, wlr_egl_get_context(g_pCompositor->m_sWLREGL)),
-            "Couldn't set current EGL!");
+    //RASSERT(eglMakeCurrent(wlr_egl_get_display(g_pCompositor->m_sWLREGL), EGL_NO_SURFACE, EGL_NO_SURFACE, wlr_egl_get_context(g_pCompositor->m_sWLREGL)),
+    //        "Couldn't set current EGL!");
+    g_pHyprRenderer->makeEGLCurrent();
 
     GLuint prog                              = CreateProgram(QUADVERTSRC, FRAGBORDER2);
     g_pGlobalState->borderShader.program     = prog;
@@ -103,7 +103,7 @@ void initGlobal() {
     g_pGlobalState->borderShader.angle       = glGetUniformLocation(prog, "angle");
     g_pGlobalState->borderShader.alpha       = glGetUniformLocation(prog, "alpha");
 
-    RASSERT(eglMakeCurrent(wlr_egl_get_display(g_pCompositor->m_sWLREGL), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT), "Couldn't unset current EGL!");
+    //RASSERT(eglMakeCurrent(wlr_egl_get_display(g_pCompositor->m_sWLREGL), EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT), "Couldn't unset current EGL!");
 
     g_pGlobalState->tick = wl_event_loop_add_timer(g_pCompositor->m_sWLEventLoop, &onTick, nullptr);
     wl_event_source_timer_update(g_pGlobalState->tick, 1);
@@ -118,7 +118,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
     if (HASH != GIT_COMMIT_HASH) {
         HyprlandAPI::addNotification(PHANDLE, "[fancy-border] Failure in initialization: Version mismatch (headers ver is not equal to running hyprland ver)",
                                      CColor{1.0, 0.2, 0.2, 1.0}, 5000);
-        throw std::runtime_error("[bpp] Version mismatch");
+        throw std::runtime_error("[fb] Version mismatch");
     }
 
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:fancy-border:add_borders", Hyprlang::INT{1});
@@ -146,7 +146,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
     HyprlandAPI::addNotification(PHANDLE, "[fancy-border] Initialized successfully!", CColor{0.2, 1.0, 0.2, 1.0}, 5000);
 
-    return {"fancy-border", "A plugin to add more borders to windows.", "Ren", "0.1"};
+    return {"fancy-border", "A plugin to add chamfered borders to windows.", "Ren", "0.1"};
 }
 
 APICALL EXPORT void PLUGIN_EXIT() {

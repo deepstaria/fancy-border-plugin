@@ -2,12 +2,15 @@
 
 #include <hyprland/src/Compositor.hpp>
 #include <hyprland/src/desktop/Window.hpp>
+#include <pango/pangocairo.h>
 
 #include "globals.hpp"
 
 CFancyBorder::CFancyBorder(PHLWINDOW pWindow) : IHyprWindowDecoration(pWindow), m_pWindow(pWindow) {
     m_vLastWindowPos  = pWindow->m_vRealPosition.value();
     m_vLastWindowSize = pWindow->m_vRealSize.value();
+
+    //m_tBorderShape = makeShared<CTexture>();
 }
 
 CFancyBorder::~CFancyBorder() {
@@ -56,6 +59,7 @@ eDecorationLayer CFancyBorder::getDecorationLayer() {
     return DECORATION_LAYER_OVER;
 }
 
+    
 std::string CFancyBorder::getDisplayName() {
     return "FancyBorders";
 }
@@ -64,8 +68,9 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
     if (!validMapped(m_pWindow))
         return;
 
-	const auto PWINDOW = m_pWindow.lock();
-    if (!PWINDOW->m_sSpecialRenderData.decorate)
+	  const auto PWINDOW = m_pWindow.lock();
+
+    if(!PWINDOW->m_sWindowData.decorate.valueOrDefault())
         return;
 
     static std::vector<Hyprlang::INT* const*> PCOLORS;
@@ -92,12 +97,16 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
 
     fullBox.translate(PWINDOW->m_vFloatingOffset - pMonitor->vecPosition + WORKSPACEOFFSET).scale(pMonitor->scale);
 
+    // create box fullbox.xy, 100x100 in pixels
+    //CBox square_test = {fullBox.x, fullBox.y, 100.0, 100.0};
+
     double fullThickness = 0;
 
     fullBox.x -= **PBORDERSIZE * pMonitor->scale;
     fullBox.y -= **PBORDERSIZE * pMonitor->scale;
     fullBox.width += **PBORDERSIZE * 2 * pMonitor->scale;
     fullBox.height += **PBORDERSIZE * 2 * pMonitor->scale;
+
 
     for (size_t i = 0; i < **PBORDERS; ++i) {
         const int PREVBORDERSIZESCALED = i == 0 ? 0 : (**PSIZES[i - 1] == -1 ? **PBORDERSIZE : **(PSIZES[i - 1])) * pMonitor->scale;
@@ -129,14 +138,70 @@ void CFancyBorder::draw(CMonitor* pMonitor, float a) {
 
     m_seExtents = {{fullThickness, fullThickness}, {fullThickness, fullThickness}};
 
-	m_bLastRelativeBox = CBox{0, 0, m_vLastWindowSize.x, m_vLastWindowSize.y}.expand(**PBORDERSIZE).addExtents(m_seExtents);
+    // create image texture, just a red square currently
+    //if( m_tBorderShape->m_iTexID == 0 )
+    //    renderBorderTexture();
+
+    // draw image texture to window
+    //if( m_tBorderShape->m_iTexID != 0 )
+    //    g_pHyprOpenGL->renderTexture(m_tBorderShape, &square_test, a);
+
+	  m_bLastRelativeBox = CBox{0, 0, m_vLastWindowSize.x, m_vLastWindowSize.y}.expand(**PBORDERSIZE).addExtents(m_seExtents);
     if (fullThickness != m_fLastThickness) {
         m_fLastThickness = fullThickness;
         g_pDecorationPositioner->repositionDeco(this);
     }
 }
 
+void CFancyBorder::renderBorderTexture() {
+    const auto CAIROSURFACE = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 100, 100);
+    const auto CAIRO        = cairo_create(CAIROSURFACE);
 
+    // clear the pixmap
+    cairo_save(CAIRO);
+    cairo_set_operator(CAIRO, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(CAIRO);
+    cairo_restore(CAIRO);
+
+    // draw stuff
+    cairo_set_source_rgba(CAIRO, 1.0, 0.0, 0.0, 1.0);
+    cairo_rectangle (CAIRO, 0.0, 0.0, 25.0, 100.0);
+    cairo_fill (CAIRO);
+    cairo_set_source_rgba(CAIRO, 0.0, 1.0, 0.0, 1.0);
+    cairo_rectangle (CAIRO, 25.0, 0.0, 25.0, 100.0);
+    cairo_fill (CAIRO);
+    cairo_set_source_rgba(CAIRO, 0.0, 0.0, 1.0, 1.0);
+    cairo_rectangle (CAIRO, 50.0, 0.0, 25.0, 100.0);
+    cairo_fill (CAIRO);
+    cairo_set_source_rgba(CAIRO, 0.0, 0.0, 0.0, 1.0);
+    cairo_rectangle (CAIRO, 75.0, 0.0, 25.0, 100.0);
+    cairo_fill (CAIRO);
+    //cairo_surface_flush(CAIROSURFACE);
+
+    // cairo to texture
+    const auto DATA = cairo_image_surface_get_data(CAIROSURFACE);
+    m_tBorderShape->allocate();
+    glBindTexture(GL_TEXTURE_2D, m_tBorderShape->m_iTexID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+#ifndef GLES2
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+#endif
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 100, 100, 0, GL_RGBA, GL_UNSIGNED_BYTE, DATA);
+
+    // delete cairo
+    cairo_destroy(CAIRO);
+    cairo_surface_destroy(CAIROSURFACE);
+}
+
+// copy of hyprland src/Hyprland/src/render/OpenGl.cpp:renderBorder
+// scissor(), blend(), m_RenderData and m_pCurrentWindow obtained from g_pHyprOpenGL
+// shBORDER1 shader program replaced with local g_pGlobalState->borderShader
+// added bool m_bEndFrame = false; // this normally does not get set to true with this call
+// replaced m_bBlend with glIsEnabled(GL_BLEND); to get state from opengl directly
 void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int round, int borderSize, float a, int outerRound) {
     RASSERT((box->width > 0 && box->height > 0), "Tried to render rect with width/height < 0!");
     RASSERT(g_pHyprOpenGL->m_RenderData.pMonitor, "Tried to render rect without begin()!");
@@ -145,8 +210,7 @@ void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int r
 
     bool m_bEndFrame = false; // normally false
 
-
-    if (g_pHyprOpenGL->m_RenderData.damage.empty() || (g_pHyprOpenGL->m_pCurrentWindow.lock() && g_pHyprOpenGL->m_pCurrentWindow->m_sAdditionalConfigData.forceNoBorder))
+    if (g_pHyprOpenGL->m_RenderData.damage.empty() || (g_pHyprOpenGL->m_pCurrentWindow.lock() && g_pHyprOpenGL->m_pCurrentWindow->m_sWindowData.noBorder.valueOrDefault()))
         return;
 
     CBox newBox = *box;
@@ -169,21 +233,24 @@ void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int r
     round += round == 0 ? 0 : scaledBorderSize;
 
     float matrix[9];
-    wlr_matrix_project_box(matrix, box->pWlr(), wlr_output_transform_invert(!m_bEndFrame ? WL_OUTPUT_TRANSFORM_NORMAL : g_pHyprOpenGL->m_RenderData.pMonitor->transform), newBox.rot,
-                           g_pHyprOpenGL->m_RenderData.pMonitor->projMatrix.data()); // TODO: write own, don't use WLR here
+    projectBox(matrix, newBox, wlTransformToHyprutils(invertTransform(!m_bEndFrame ? WL_OUTPUT_TRANSFORM_NORMAL : g_pHyprOpenGL->m_RenderData.pMonitor->transform)), newBox.rot,
+               g_pHyprOpenGL->m_RenderData.monitorProjection.data());
 
-    float glMatrix[9]; 
-    wlr_matrix_multiply(glMatrix, g_pHyprOpenGL->m_RenderData.projection, matrix);
-    
-    const auto BLEND = glIsEnabled(GL_BLEND); //m_bBlend;
+    float glMatrix[9];
+    matrixMultiply(glMatrix, g_pHyprOpenGL->m_RenderData.projection, matrix);
+
+    //const auto BLEND = m_bBlend;
+    //blend(true);
+    const auto BLEND = glIsEnabled(GL_BLEND);
     g_pHyprOpenGL->blend(true);
+
 
     glUseProgram(g_pGlobalState->borderShader.program);
 
 #ifndef GLES2
     glUniformMatrix3fv(g_pGlobalState->borderShader.proj, 1, GL_TRUE, glMatrix);
 #else
-    wlr_matrix_transpose(glMatrix, glMatrix);
+    matrixTranspose(glMatrix, glMatrix);
     glUniformMatrix3fv(g_pGlobalState->borderShader.proj, 1, GL_FALSE, glMatrix);
 #endif
 
@@ -195,7 +262,7 @@ void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int r
     glUniform1f(g_pGlobalState->borderShader.alpha, a);
 
     CBox transformedBox = *box;
-    transformedBox.transform(wlr_output_transform_invert(g_pHyprOpenGL->m_RenderData.pMonitor->transform), g_pHyprOpenGL->m_RenderData.pMonitor->vecTransformedSize.x,
+    transformedBox.transform(wlTransformToHyprutils(invertTransform(g_pHyprOpenGL->m_RenderData.pMonitor->transform)), g_pHyprOpenGL->m_RenderData.pMonitor->vecTransformedSize.x,
                              g_pHyprOpenGL->m_RenderData.pMonitor->vecTransformedSize.y);
 
     const auto TOPLEFT  = Vector2D(transformedBox.x, transformedBox.y);
@@ -232,7 +299,6 @@ void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int r
     }
 
     glDisableVertexAttribArray(g_pGlobalState->borderShader.posAttrib);
-
     glDisableVertexAttribArray(g_pGlobalState->borderShader.texAttrib);
 
     g_pHyprOpenGL->blend(BLEND);
