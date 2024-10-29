@@ -1,4 +1,4 @@
-project('fancy-border', 'cpp',
+project('fancy-borders', 'cpp',
   version: '0.1',
   default_options: ['buildtype=release'],
 )
