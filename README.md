@@ -8,18 +8,17 @@
 
 <div align = left>
 
-Replaces rounded corners with chamfered corners. Currently, it functions pretty much the same as borders++, but it also loads in a slightly different border shader. The rendering is done by incorporating a copy of the renderBorder() function from the Hyprland source (src/Hyprland/src/render/OpenGl.cpp) so this plugin has a tendency to break (often) whenever there's a Hyprland or hyprland-plugin update.
+Replaces rounded corners with chamfered corners. Currently, it functions pretty much the same as borders++, but it also loads in a slightly different border shader. The rendering is done by incorporating a copy of the renderBorder() function from the Hyprland source (src/Hyprland/src/render/OpenGl.cpp) so this plugin has a tendency to break (often) whenever there's a Hyprland update.
 
 currently this works with:
-hyprland-git (v0.44.0)
-hyprland-plugins-git (v0.44.0)
+hyprland-git (v0.46.0)
 
 
 ## Building:
 
-Ensure hyprland and hyprland-plugins is installed:
+Ensure hyprland is installed:
 Use `make` or meson/ninja to build.
-The compile output needs to exist in /usr/lib/hyprland-plugins/ to satisfy dependencies.
+The compile output should be copied to /usr/lib/hyprland-plugins/ to satisfy dependencies.
 
 
 ## Example Config:

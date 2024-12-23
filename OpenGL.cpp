@@ -58,16 +58,15 @@ void CFancyBorder::renderBorder(CBox* box, const CGradientValueData& grad, int r
 #ifndef GLES2
     glUniformMatrix3fv(g_pGlobalState->borderShader.proj, 1, GL_TRUE, glMatrix.getMatrix().data());
 #else
-    matrixTranspose(glMatrix, glMatrix);
+    glMatrix.transpose();
     glUniformMatrix3fv(g_pGlobalState->borderShader.proj, 1, GL_FALSE, glMatrix.getMatrix().data());
 #endif
 
-    static_assert(sizeof(CColor) == 4 * sizeof(float)); // otherwise the line below this will fail
-
-    glUniform4fv(g_pGlobalState->borderShader.gradient, grad.m_vColors.size(), (float*)grad.m_vColors.data());
-    glUniform1i(g_pGlobalState->borderShader.gradientLength, grad.m_vColors.size());
+    glUniform4fv(g_pGlobalState->borderShader.gradient, grad.m_vColorsOkLabA.size() / 4, (float*)grad.m_vColorsOkLabA.data());
+    glUniform1i(g_pGlobalState->borderShader.gradientLength, grad.m_vColorsOkLabA.size() / 4);
     glUniform1f(g_pGlobalState->borderShader.angle, (int)(grad.m_fAngle / (PI / 180.0)) % 360 * (PI / 180.0));
     glUniform1f(g_pGlobalState->borderShader.alpha, a);
+    glUniform1f(g_pGlobalState->borderShader.gradient2Length, 0);
 
     CBox transformedBox = *box;
     transformedBox.transform(wlTransformToHyprutils(invertTransform(m_RenderData.pMonitor->transform)), m_RenderData.pMonitor->vecTransformedSize.x,

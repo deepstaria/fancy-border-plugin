@@ -64,7 +64,7 @@ std::string CFancyBorder::getDisplayName() {
     return "FancyBorders";
 }
 
-void CFancyBorder::draw(PHLMONITOR pMonitor, float a) {
+void CFancyBorder::draw(PHLMONITOR pMonitor, float const& a) {
     if (!validMapped(m_pWindow))
         return;
 
@@ -134,7 +134,7 @@ void CFancyBorder::draw(PHLMONITOR pMonitor, float a) {
 
         renderBorder(
             &fullBox, 
-            CColor{(uint64_t) * *PCOLORS[i]}, //grad
+            CHyprColor{(uint64_t) **PCOLORS[i]}, //grad
             rounding, 
             THISBORDERSIZE,
             a, //alpha

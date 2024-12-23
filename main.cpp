@@ -99,7 +99,9 @@ void initGlobal() {
     g_pGlobalState->borderShader.radius      = glGetUniformLocation(prog, "radius");
     g_pGlobalState->borderShader.radiusOuter = glGetUniformLocation(prog, "radiusOuter");
     g_pGlobalState->borderShader.gradient    = glGetUniformLocation(prog, "gradient");
+    g_pGlobalState->borderShader.gradient2    = glGetUniformLocation(prog, "gradient2");
     g_pGlobalState->borderShader.gradientLength = glGetUniformLocation(prog, "gradientLength");
+    g_pGlobalState->borderShader.gradient2Length = glGetUniformLocation(prog, "gradient2Length");
     g_pGlobalState->borderShader.angle       = glGetUniformLocation(prog, "angle");
     g_pGlobalState->borderShader.alpha       = glGetUniformLocation(prog, "alpha");
 
@@ -117,14 +119,14 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
 
     if (HASH != GIT_COMMIT_HASH) {
         HyprlandAPI::addNotification(PHANDLE, "[fancy-borders] Failure in initialization: Version mismatch (headers ver is not equal to running hyprland ver)",
-                                     CColor{1.0, 0.2, 0.2, 1.0}, 5000);
+                                     CHyprColor{1.0, 0.2, 0.2, 1.0}, 5000);
         throw std::runtime_error("[fb] Version mismatch");
     }
 
     HyprlandAPI::addConfigValue(PHANDLE, "plugin:fancy-borders:add_borders", Hyprlang::INT{1});
 
     for (size_t i = 0; i < 9; ++i) {
-        HyprlandAPI::addConfigValue(PHANDLE, "plugin:fancy-borders:col.border_" + std::to_string(i + 1), Hyprlang::INT{configStringToInt("rgba(000000ee)")});
+        HyprlandAPI::addConfigValue(PHANDLE, "plugin:fancy-borders:col.border_" + std::to_string(i + 1), Hyprlang::INT{*configStringToInt("rgba(000000ee)")});
         HyprlandAPI::addConfigValue(PHANDLE, "plugin:fancy-borders:border_size_" + std::to_string(i + 1), Hyprlang::INT{-1});
     }
 
@@ -143,8 +145,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
         HyprlandAPI::addWindowDecoration(PHANDLE, w, std::make_unique<CFancyBorder>(w));
     }
 
-    HyprlandAPI::addNotification(PHANDLE, "[fancy-borders] Initialized successfully!", CColor{0.2, 1.0, 0.2, 1.0}, 5000);
-
+    HyprlandAPI::addNotification(PHANDLE, "[fancy-borders] Initialized successfully!", CHyprColor{0.2, 1.0, 0.2, 1.0}, 5000);
     return {"fancy-borders", "A plugin to add chamfered borders to windows.", "Ren", "0.1"};
 }
 
